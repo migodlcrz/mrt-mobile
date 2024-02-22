@@ -10,7 +10,6 @@ import CardPage from './components/CardPage';
 import TransactionPage from './components/TransactionPage';
 import {RootStackParamList} from './types/types';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-// import {Ionicons} from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
