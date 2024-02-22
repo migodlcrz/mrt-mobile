@@ -2,10 +2,9 @@ import React from 'react';
 import {View, Text, Button} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useState} from 'react';
+import {LoginProps} from '../types/types';
 
-function LoginPage() {
-  const navigation = useNavigation();
-
+const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   const navigateHome = () => {
     navigation.navigate('Home');
   };
@@ -22,6 +21,6 @@ function LoginPage() {
       <Button title="Login" onPress={navigateHome} />
     </View>
   );
-}
+};
 
 export default LoginPage;

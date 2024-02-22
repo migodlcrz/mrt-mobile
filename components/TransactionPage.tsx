@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import {Text, View} from 'react-native';
 
-function HomePage() {
+const TransactionPage = () => {
   return (
     <View
       style={{
@@ -10,9 +10,9 @@ function HomePage() {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Text className="text-black font-bold">HOME</Text>
+      <Text className="text-black font-bold">TRANSACTION</Text>
     </View>
   );
-}
+};
 
-export default HomePage;
+export default TransactionPage;
