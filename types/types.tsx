@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Card: undefined;
   Scan: undefined;
   Transaction: undefined;
+  Main: undefined;
 };
 
 export type LoginProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
@@ -16,9 +17,4 @@ export type TransactionProps = NativeStackScreenProps<
   RootStackParamList,
   'Transaction'
 >;
-
-// export type PinProps = NativeStackScreenProps<RootStackParamList, 'Pin'> & {
-//   onPinSuccess: () => void;
-// };
-
-// export type TestProps = NativeStackScreenProps<RootStackParamList, 'Test'>;
+export type MainProps = NativeStackScreenProps<RootStackParamList, 'Main'>;

@@ -5,8 +5,8 @@ import {useState} from 'react';
 import {LoginProps} from '../types/types';
 
 const LoginPage: React.FC<LoginProps> = ({navigation}) => {
-  const navigateHome = () => {
-    navigation.navigate('Home');
+  const navigateToHome = () => {
+    navigation.navigate('Main');
   };
 
   return (
@@ -18,7 +18,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
         alignItems: 'center',
       }}>
       <Text>Login Page</Text>
-      <Button title="Login" onPress={navigateHome} />
+      <Button title="Login" onPress={navigateToHome} />
     </View>
   );
 };
