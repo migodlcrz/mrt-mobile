@@ -10,9 +10,11 @@ import CardPage from './components/CardPage';
 import TransactionPage from './components/TransactionPage';
 import {RootStackParamList} from './types/types';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {MMKV} from 'react-native-mmkv';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
+export const storage = new MMKV();
 
 function App() {
   return (
