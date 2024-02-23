@@ -5,7 +5,7 @@ import {storage} from '../App';
 import Toast from 'react-native-toast-message';
 
 const LoginPage: React.FC<LoginProps> = ({navigation}) => {
-  storage.set('pin', '081302');
+  storage.set('pin', '0813');
 
   const [pin, setPin] = useState('');
 
@@ -17,7 +17,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
       Toast.show({
         type: 'error',
         text1: 'No input!',
-        text1Style: {color: '#0d9276'},
+        text1Style: {color: 'red', fontSize: 20},
       });
       return;
     }
@@ -25,7 +25,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
       Toast.show({
         type: 'error',
         text1: 'Wrong Pin!',
-        text1Style: {color: '#0d9276'},
+        text1Style: {color: 'red', fontSize: 20},
       });
       setPin('');
       console.log('Pin Incorrect');
@@ -36,7 +36,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   };
 
   const setPinAndUpdate = (newPin: string) => {
-    if (newPin.length <= 6) {
+    if (newPin.length <= 4) {
       setPin(newPin);
     }
   };
@@ -55,17 +55,35 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
           <Text className=" text-black font-bold text-3xl">Welcome User</Text>
         </View>
         <View className="space-y-4 items-center">
-          <View className="flex flex-row space-x-4 justify-center">
+          <View className="flex flex-row space-x-2 justify-center">
             <TextInput
-              className="bg-slate-200 border-[#0d9276] border-2 px-3 w-56 py-2 rounded-lg text-black text-3xl text-center font-bold"
-              placeholder="Enter Pin"
+              className="pin1 bg-slate-200 border-[#0d9276] border-2 px-3 w-14 py-2 rounded-lg text-black text-3xl text-center font-bold"
               placeholderTextColor="#BDBDBD"
               readOnly
-              value={pin}
+              value={pin[0] || ''}
+            />
+            <TextInput
+              className="pin2 bg-slate-200 border-[#0d9276] border-2 px-3 w-14 py-2 rounded-lg text-black text-3xl text-center font-bold"
+              placeholderTextColor="#BDBDBD"
+              readOnly
+              value={pin[1] || ''}
+            />
+            <TextInput
+              className="pin3 bg-slate-200 border-[#0d9276] border-2 px-3 w-14 py-2 rounded-lg text-black text-3xl text-center font-bold"
+              placeholderTextColor="#BDBDBD"
+              readOnly
+              value={pin[2] || ''}
+            />
+            <TextInput
+              className="pin4 bg-slate-200 border-[#0d9276] border-2 px-3 w-14 py-2 rounded-lg text-black text-3xl text-center font-bold"
+              placeholderTextColor="#BDBDBD"
+              readOnly
+              value={pin[3] || ''}
             />
           </View>
-          <View className="flex flex-col space-y-4 w-[217px] items-center">
-            <View className="flex flex-row space-x-6">
+
+          <View className="flex flex-col space-y-4 w-[200px] items-center">
+            <View className="flex flex-row space-x-4">
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '1');
@@ -88,7 +106,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 <Text className="font-bold text-[#dbe7c9] text-2xl">3</Text>
               </TouchableOpacity>
             </View>
-            <View className="flex flex-row space-x-6">
+            <View className="flex flex-row space-x-4">
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '4');
@@ -111,7 +129,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 <Text className="font-bold text-[#dbe7c9] text-2xl">6</Text>
               </TouchableOpacity>
             </View>
-            <View className="flex flex-row space-x-6">
+            <View className="flex flex-row space-x-4">
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '7');
@@ -134,7 +152,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 <Text className="font-bold text-[#dbe7c9] text-2xl">9</Text>
               </TouchableOpacity>
             </View>
-            <View className="flex flex-row space-x-6 w-full justify-end">
+            <View className="flex flex-row space-x-4 w-full justify-end">
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '0');
