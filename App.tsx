@@ -11,6 +11,7 @@ import TransactionPage from './components/TransactionPage';
 import {RootStackParamList} from './types/types';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MMKV} from 'react-native-mmkv';
+import Toast from 'react-native-toast-message';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -31,6 +32,7 @@ function App() {
           options={{headerShown: false}}
         />
       </Stack.Navigator>
+      <Toast />
     </NavigationContainer>
   );
 }

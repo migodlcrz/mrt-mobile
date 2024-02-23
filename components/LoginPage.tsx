@@ -2,14 +2,10 @@ import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, TextInput} from 'react-native';
 import {LoginProps} from '../types/types';
 import {storage} from '../App';
-// import {MMKV} from 'react-native-mmkv';
-
-// export const storage = new MMKV();
+import Toast from 'react-native-toast-message';
 
 const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   storage.set('pin', '081302');
-  // storage.set('user.age', 21);
-  // storage.set('is-mmkv-fast-asf', true);
 
   const [pin, setPin] = useState('');
 
@@ -17,7 +13,20 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
     const localPin = storage.getString('pin');
     console.log('Local storage pin: ', storage.getString('pin'));
     console.log('Pin entered: ', pin);
+    if (pin === ``) {
+      Toast.show({
+        type: 'error',
+        text1: 'No input!',
+        text1Style: {color: '#0d9276'},
+      });
+      return;
+    }
     if (localPin !== pin) {
+      Toast.show({
+        type: 'error',
+        text1: 'Wrong Pin!',
+        text1Style: {color: '#0d9276'},
+      });
       setPin('');
       console.log('Pin Incorrect');
       return;
