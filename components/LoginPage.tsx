@@ -88,21 +88,22 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 onPress={() => {
                   setPinAndUpdate(pin + '1');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 flex justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">1</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '2');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">2</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '3');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">3</Text>
               </TouchableOpacity>
             </View>
@@ -111,21 +112,21 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 onPress={() => {
                   setPinAndUpdate(pin + '4');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">4</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '5');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">5</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '6');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">6</Text>
               </TouchableOpacity>
             </View>
@@ -134,21 +135,21 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 onPress={() => {
                   setPinAndUpdate(pin + '7');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">7</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '8');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">8</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   setPinAndUpdate(pin + '9');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">9</Text>
               </TouchableOpacity>
             </View>
@@ -157,13 +158,13 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 onPress={() => {
                   setPinAndUpdate(pin + '0');
                 }}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
+                className="bg-[#0d9276] p-3 rounded-full shadow-lg shadow-black h-14 w-14 justify-center items-center">
                 <Text className="font-bold text-[#dbe7c9] text-2xl">0</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleBackspace}
-                className="bg-[#0d9276] p-3 rounded-lg shadow-lg shadow-black h-14 w-14 justify-center items-center">
-                <Text className="font-bold text-[#dbe7c9]">{`<`}</Text>
+                className="bg-[#dbe7c9] p-3 rounded-full h-14 w-14 justify-center items-center">
+                <Text className="font-bold text-black">{`<`}</Text>
               </TouchableOpacity>
             </View>
           </View>
