@@ -29,10 +29,8 @@ const CardPage = () => {
 
       const cards: Card[] = await response.json();
 
-      // Now, you can iterate through the cards and check for a match
       cards.forEach(card => {
         if (card.uid === uid) {
-          console.log('Match found:', card);
           setFetchedCard(card);
         }
       });
@@ -68,23 +66,24 @@ const CardPage = () => {
               onSubmitEditing={handleAddCard}
             />
           </View>
-          <View className="flex flex-col bg-[#0d9276] rounded-3xl p-2 justify-center items-center">
-            {/* <View className="bg-[#dbe7c9] w-full rounded-2xl p-2"> */}
-            <Text className="text-[#dbe7c9] text-start font-bold text-4xl">
+          <View className="flex flex-col bg-[#0d9276] rounded-3xl p-4 justify-center">
+            <Text className="text-[#dbe7c9] font-bold text-4xl">
               {fetchedCard?.uid}
             </Text>
             <Text className="text-[#dbe7c9] text-2xl">
-              Balance: {fetchedCard?.balance}
+              Balance: ₱{fetchedCard?.balance}
             </Text>
-            <Text className="text-[#dbe7c9] text-start text-3xl font-bold">
+            {/* <Text className="text-[#dbe7c9] text-start text-3xl font-bold">
               History:
             </Text>
             {fetchedCard?.history.map((entry, index) => (
               <View key={index}>
                 <Text>{`In: ${entry.in}, Out: ${entry.out}, Date: ${entry.date}`}</Text>
               </View>
-            ))}
-            {/* </View> */}
+            ))} */}
+            <TouchableOpacity>
+              <Text>See History</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
