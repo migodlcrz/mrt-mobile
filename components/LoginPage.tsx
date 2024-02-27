@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, TextInput} from 'react-native';
 import {LoginProps} from '../types/types';
 import {storage} from '../App';
@@ -7,12 +7,25 @@ import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 
 const LoginPage: React.FC<LoginProps> = ({navigation}) => {
-  storage.set('pin', '0813');
+  // storage.set('pin', '0813');
 
   const [pin, setPin] = useState('');
   const [showKeyboard, setShowKeyboard] = useState(false);
+  const [pinMessage, setPinMessage] = useState('Enter your pin');
 
   const checkPin = () => {
+    if (pinMessage === 'Register your pin.') {
+      storage.set('pin', pin);
+      Toast.show({
+        type: 'success',
+        text1: 'Pin registered!',
+        text1Style: {color: 'green', fontSize: 20},
+      });
+      setPinMessage('Enter your pin');
+      setPin('');
+      setShowKeyboard(false);
+      return;
+    }
     const localPin = storage.getString('pin');
     console.log('Local storage pin: ', storage.getString('pin'));
     console.log('Pin entered: ', pin);
@@ -47,6 +60,13 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   const handleBackspace = () => {
     setPin(prev => prev.slice(0, -1));
   };
+
+  useEffect(() => {
+    storage.set('pin', '');
+    if (storage.getString('pin') === '') {
+      setPinMessage('Register your pin.');
+    }
+  }, []);
 
   return (
     <View className="bg-[#dbe7c9] h-full justify-center items-center">
@@ -88,7 +108,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
           </TouchableOpacity>
           {!showKeyboard && (
             <View>
-              <Text className="text-gray-400">Enter your pin.</Text>
+              <Text className="text-gray-400">{pinMessage}</Text>
             </View>
           )}
           {showKeyboard && (

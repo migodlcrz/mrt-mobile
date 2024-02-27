@@ -12,6 +12,7 @@ import {RootStackParamList} from './types/types';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MMKV} from 'react-native-mmkv';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -42,15 +43,18 @@ const MainTabs = () => {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
-        tabBarStyle: {backgroundColor: '#0d9276'},
+        tabBarStyle: {backgroundColor: '#0d9276', height: 50, padding: 4},
         tabBarActiveTintColor: '#424242',
         tabBarInactiveTintColor: '#dbe7c9',
-        // tabBarActiveBackgroundColor: 'green',
+        tabBarActiveBackgroundColor: 'green',
       }}>
       <Tab.Screen
         name="Home"
         component={HomePage}
         options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon name={focused ? 'home' : 'home'} size={size} color={color} />
+          ),
           headerShown: true,
           headerStyle: {
             backgroundColor: '#0d9276',
@@ -65,6 +69,13 @@ const MainTabs = () => {
         name="Card"
         component={CardPage}
         options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon
+              name={focused ? 'credit-card' : 'credit-card'}
+              size={size}
+              color={color}
+            />
+          ),
           headerShown: true,
           headerStyle: {
             backgroundColor: '#0d9276',
@@ -79,6 +90,13 @@ const MainTabs = () => {
         name="Scan"
         component={ScanPage}
         options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon
+              name={focused ? 'qrcode' : 'qrcode'}
+              size={size}
+              color={color}
+            />
+          ),
           headerShown: true,
           headerStyle: {
             backgroundColor: '#0d9276',
@@ -89,7 +107,7 @@ const MainTabs = () => {
           },
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Transaction"
         component={TransactionPage}
         options={{
@@ -102,7 +120,7 @@ const MainTabs = () => {
             fontWeight: 'bold',
           },
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 };

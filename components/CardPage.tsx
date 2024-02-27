@@ -170,10 +170,8 @@ const CardPage = () => {
             {lCards &&
               lCards.map((card: Card, index: number) => {
                 return (
-                  <View>
-                    <View
-                      key={card._id}
-                      className="flex flex-col space-y-2 bg-[#0d9276] rounded-3xl p-4 justify-center shadow-lg shadow-black my-2">
+                  <View key={card._id}>
+                    <View className="flex flex-col space-y-2 bg-[#0d9276] rounded-3xl p-4 justify-center shadow-lg shadow-black my-2">
                       <Text className="text-[#dbe7c9] font-bold text-4xl">
                         {card.uid}
                       </Text>

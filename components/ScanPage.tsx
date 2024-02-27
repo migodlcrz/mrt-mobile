@@ -8,8 +8,9 @@ import {
 } from 'react-native-vision-camera';
 import {useIsFocused} from '@react-navigation/native';
 import {useAppState} from '@react-native-community/hooks';
+import {ScanProps} from '../types/types';
 
-const ScanPage = () => {
+const ScanPage: React.FC<ScanProps> = ({navigation}) => {
   const [cameraPermission, setCameraPermission] = useState(false);
   const [active, setActive] = useState(false);
   const {hasPermission, requestPermission} = useCameraPermission();
@@ -46,9 +47,15 @@ const ScanPage = () => {
     onCodeScanned: codes => {
       console.log(`Scanned codes!`, codes);
       setActive(false);
-      // return navigation.navigate('DefHome');
+      return navigation.navigate('Card');
     },
   });
+
+  const BoxOverlay = () => (
+    <View className="flex w-full h-full items-center justify-center">
+      <View className="border-4 border-[#0d9276] w-48 h-48 rounded-md" />
+    </View>
+  );
 
   return (
     <>
@@ -57,7 +64,10 @@ const ScanPage = () => {
           {active ? (
             <>
               <View className="absolute w-full h-full z-50">
-                <Text className="text-3xl self-center mt-10">QR SCANNER</Text>
+                {/* <Text className="text-3xl self-center mt-10 text-white">
+                  QR SCANNER
+                </Text> */}
+                <BoxOverlay />
               </View>
               <Camera
                 device={device}
