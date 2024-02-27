@@ -22,7 +22,7 @@ const CardPage = () => {
   const [cardSearch, setCardSearch] = useState<string>('');
   const [fetchedCard, setFetchedCard] = useState<Card | null>(null);
   const [hasSearchTerm, setHasSearchTerm] = useState(false);
-  const [localCards, setLocalCards] = useState<Card[]>([]);
+  const [lCards, setLCards] = useState<Card[]>([]);
 
   const fetchMatchingCards = async () => {
     const uid = Number(cardSearch);
@@ -68,28 +68,41 @@ const CardPage = () => {
 
   const handleAddCard = async () => {
     try {
-      if (fetchedCard) {
-        const existingCards = storage.getString('cardlist');
-        console.log('EXISTING CARDS', existingCards);
-        const cardString = JSON.stringify(fetchedCard);
-
-        storage.set('cardlist', existingCards + cardString);
-
-        console.log('success');
-      } else {
-        console.log('no card');
+      let existingCards = storage.getString('cardlist');
+      if (!existingCards) {
+        existingCards = '[]';
       }
-      setCardSearch('');
-      setHasSearchTerm(false);
+
+      console.log('EXISTING CARDS', existingCards);
+
+      const cardString = JSON.stringify(fetchedCard);
+
+      storage.set(
+        'cardlist',
+        JSON.stringify([...JSON.parse(existingCards), fetchedCard]),
+      );
+
+      console.log('success');
+      fetchLocalCards();
     } catch (error) {
       console.log('internal error');
     }
 
-    console.log('==================================');
-    console.log(storage.getString('cardlist'));
+    setCardSearch('');
+    setHasSearchTerm(false);
+    Toast.show({
+      type: 'success',
+      text1: `${cardSearch} added!  `,
+      text1Style: {color: 'green', fontSize: 20},
+    });
   };
 
-  const fetchLocalCards = () => {};
+  const fetchLocalCards = () => {
+    const localCards = storage.getString('cardlist');
+    if (localCards) {
+      setLCards(JSON.parse(localCards));
+    }
+  };
 
   useEffect(() => {
     fetchLocalCards();
@@ -104,7 +117,7 @@ const CardPage = () => {
 
         {/* search card */}
         <View className="flex space-y-4 w-full h-full max-h-full pt-4">
-          <View className="flex flex-row bg-[#0d9276] rounded-3xl p-2 justify-center items-center">
+          <View className="flex flex-row bg-[#0d9276] rounded-3xl p-2 justify-center items-center shadow-lg shadow-black">
             <TextInput
               value={cardSearch}
               onChangeText={text => setCardSearch(text)}
@@ -118,7 +131,7 @@ const CardPage = () => {
 
           {/* confirm card */}
           {hasSearchTerm ? (
-            <View className="flex flex-col space-y-2 bg-[#0d9276] rounded-3xl p-4 justify-center">
+            <View className="flex flex-col space-y-2 bg-[#0d9276] rounded-3xl p-4 justify-center shadow-lg shadow-black">
               <Text className="text-[#dbe7c9] font-bold text-4xl">
                 {fetchedCard?.uid}
               </Text>
@@ -143,13 +156,29 @@ const CardPage = () => {
               </View>
             </View>
           ) : (
-            <View className="flex flex-col h-[150px] bg-gray-200 rounded-3xl p-4 justify-center items-center">
+            <View className="flex flex-col h-[150px] bg-gray-200 rounded-3xl p-4 justify-center items-center shadow-lg shadow-black">
               <Text className="text-gray-500">Search to see details</Text>
             </View>
           )}
           <View className=" border-t-2 border-t-[#0d9276]"></View>
           <View>
-            <Text>Hello</Text>
+            {lCards &&
+              lCards.map((card: Card, index: number) => {
+                return (
+                  <View>
+                    <View
+                      key={card._id}
+                      className="flex flex-col space-y-2 bg-[#0d9276] rounded-3xl p-4 justify-center shadow-lg shadow-black my-2">
+                      <Text className="text-[#dbe7c9] font-bold text-4xl">
+                        {card.uid}
+                      </Text>
+                      <Text className="text-[#dbe7c9] text-2xl">
+                        Balance: ₱{card.balance}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
           </View>
         </View>
       </View>
