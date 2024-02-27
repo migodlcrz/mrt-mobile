@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 function HomePage() {
   return (
@@ -11,6 +12,7 @@ function HomePage() {
         alignItems: 'center',
       }}>
       <Text className="text-black font-bold">HOME</Text>
+      <Icon name="search" size={30} color="#900" />
     </View>
   );
 }

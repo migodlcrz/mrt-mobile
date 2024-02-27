@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {storage} from '../App';
 import {
   ScrollView,
@@ -105,6 +106,8 @@ const CardPage = () => {
   };
 
   useEffect(() => {
+    // storage.delete('cardlist');
+    // storage.delete('cards');
     fetchLocalCards();
   }, []);
 
@@ -141,9 +144,9 @@ const CardPage = () => {
 
               <View className="flex flex-row  justify-between">
                 <TouchableOpacity
-                  className="bg-[#dbe7c9] items-center justify-center rounded-xl h-10 w-24"
+                  className="bg-[#dbe7c9] items-center justify-center rounded-xl h-10 w-24 shadow-lg shadow-black"
                   onPress={handleAddCard}>
-                  <Text className=" text-xl text-black">Confirm</Text>
+                  <Icon name="plus" size={30} color="#0d9276" />
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="bg-[#dbe7c9] items-center justify-center rounded-xl h-10 w-24"
@@ -151,7 +154,9 @@ const CardPage = () => {
                     setHasSearchTerm(false);
                     setCardSearch('');
                   }}>
-                  <Text className=" text-xl text-black">Cancel</Text>
+                  <Text className=" text-xl text-black">
+                    <Icon name="minus" size={30} color="#0d9276" />
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
