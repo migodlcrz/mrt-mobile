@@ -15,6 +15,15 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
 
   const checkPin = () => {
     if (pinMessage === 'Register your pin.') {
+      if (pin.length !== 4) {
+        Toast.show({
+          type: 'error',
+          text1: 'PIN must be 4 numbers!',
+          text1Style: {color: 'red', fontSize: 20},
+        });
+        setPin('');
+        return;
+      }
       storage.set('pin', pin);
       Toast.show({
         type: 'success',
