@@ -214,11 +214,19 @@ const CardPage = () => {
           </TouchableOpacity>
         </View>
         <ScrollView
+          className="mb-4"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
           {lCards &&
             lCards.map((card: Card, index: number) => {
+              let signalColor = 'red';
+              let status = 'Offboard';
+              if (card.isTap) {
+                signalColor = 'green';
+                status = 'Onboard';
+              }
+
               return (
                 <View key={index}>
                   <View className="flex flex-col space-y-2 bg-[#0d9276] rounded-2xl p-4 justify-center shadow-lg shadow-black my-2">
@@ -228,7 +236,11 @@ const CardPage = () => {
                     <Text className="text-white text-2xl">
                       Balance: ₱{card.balance}
                     </Text>
-                    <View className="flex items-end">
+                    <View className="flex flex-row justify-between items-center">
+                      <View className="flex flex-row items-center space-x-2">
+                        <Icon name="circle" size={10} color={signalColor} />
+                        <Text className="text-2xl">{status}</Text>
+                      </View>
                       <TouchableOpacity className="bg-red-800 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black">
                         <Icon name="trash" size={20} color="white" />
                       </TouchableOpacity>
