@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {storage} from '../App';
+import {Alert} from 'react-native';
 
 import {
   RefreshControl,
@@ -97,6 +98,44 @@ const CardPage = () => {
     });
   };
 
+  const handleDelete = (card: Card) => {
+    // Get the stored cards from MMKV
+    const storedCardsString = storage.getString('cardlist');
+    if (storedCardsString) {
+      const storedCards: Card[] = JSON.parse(storedCardsString);
+
+      // Find the index of the card to delete
+      const cardIndex = storedCards.findIndex(c => c._id === card._id);
+
+      if (cardIndex !== -1) {
+        // Remove the card from the array
+        storedCards.splice(cardIndex, 1);
+
+        // Save the updated array back to MMKV
+        storage.set('cardlist', JSON.stringify(storedCards));
+
+        Toast.show({
+          type: 'success',
+          text1: `Deleted!`,
+          text1Style: {color: 'green', fontSize: 20},
+        });
+        fetchLocalCards();
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: `Card not found in storage!`,
+          text1Style: {color: 'red', fontSize: 20},
+        });
+      }
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: `No cards found in storage!`,
+        text1Style: {color: 'red', fontSize: 20},
+      });
+    }
+  };
+
   const fetchLocalCards = () => {
     const localCards = storage.getString('cardlist');
     if (localCards) {
@@ -124,7 +163,7 @@ const CardPage = () => {
     if (response.ok) {
       Toast.show({
         type: 'success',
-        text1: `Refereshed`,
+        text1: `Refreshed`,
         text1Style: {color: 'green', fontSize: 20},
       });
       const responseData = await response.json();
@@ -172,40 +211,42 @@ const CardPage = () => {
 
         {/* confirm card */}
         {hasSearchTerm ? (
-          <View className="flex flex-col space-y-2 bg-[#0d9276] rounded-3xl p-4 justify-center shadow-lg shadow-black">
-            <Text className="text-[#dbe7c9] font-bold text-4xl">
-              {fetchedCard?.uid}
-            </Text>
-            <Text className="text-[#dbe7c9] text-2xl">
-              Balance: ₱{fetchedCard?.balance}
-            </Text>
+          <View className="flex flex-col space-y-2 bg-gray-200 rounded-3xl justify-center shadow-lg shadow-black">
+            <View className="flex flex-col space-y-2 bg-[#0d9276] rounded-3xl p-4 justify-center shadow-lg shadow-black m-2">
+              <Text className="text-[#dbe7c9] font-bold text-4xl">
+                {fetchedCard?.uid}
+              </Text>
+              <Text className="text-[#dbe7c9] text-2xl">
+                Balance: ₱{fetchedCard?.balance}
+              </Text>
 
-            <View className="flex flex-row  justify-between">
-              <TouchableOpacity
-                className="bg-[#dbe7c9] items-center justify-center rounded-xl h-10 w-24 shadow-lg shadow-black"
-                onPress={handleAddCard}>
-                {/* <Icon name="plus" size={30} color="#0d9276" /> */}
-                <Text className=" text-xl text-black">Add</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="bg-[#dbe7c9] items-center justify-center rounded-xl h-10 w-24"
-                onPress={() => {
-                  setHasSearchTerm(false);
-                  setCardSearch('');
-                }}>
-                <Text className=" text-xl text-black">
-                  {/* <Icon name="minus" size={30} color="#0d9276" /> */}
-                  Cancel
-                </Text>
-              </TouchableOpacity>
+              <View className="flex flex-row  justify-between">
+                <TouchableOpacity
+                  className="bg-[#dbe7c9] items-center justify-center rounded-xl h-10 w-24 shadow-lg shadow-black"
+                  onPress={handleAddCard}>
+                  {/* <Icon name="plus" size={30} color="#0d9276" /> */}
+                  <Text className=" text-xl text-black">Add</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="bg-[#dbe7c9] items-center justify-center rounded-xl h-10 w-24"
+                  onPress={() => {
+                    setHasSearchTerm(false);
+                    setCardSearch('');
+                  }}>
+                  <Text className=" text-xl text-black">
+                    {/* <Icon name="minus" size={30} color="#0d9276" /> */}
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         ) : (
-          <View className="flex flex-col h-[150px] bg-gray-200 rounded-3xl p-4 justify-center items-center shadow-lg shadow-black">
+          <View className="flex flex-col h-[166px] bg-gray-200 rounded-3xl p-4 justify-center items-center shadow-lg shadow-black">
             <Text className="text-gray-500 ">Search to see details</Text>
           </View>
         )}
-        <View className="flex flex-row justify-between items-center border-b-2">
+        <View className="flex flex-row justify-between items-center border-b-2 pb-2">
           <Text className="font-bold text-[#0d9276] text-center text-2xl">
             Cards
           </Text>
@@ -239,9 +280,11 @@ const CardPage = () => {
                     <View className="flex flex-row justify-between items-center">
                       <View className="flex flex-row items-center space-x-2">
                         <Icon name="circle" size={10} color={signalColor} />
-                        <Text className="text-2xl">{status}</Text>
+                        <Text className="text-2xl text-slate-50">{status}</Text>
                       </View>
-                      <TouchableOpacity className="bg-red-800 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black">
+                      <TouchableOpacity
+                        className="bg-red-800 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
+                        onPress={() => handleDelete(card)}>
                         <Icon name="trash" size={20} color="white" />
                       </TouchableOpacity>
                     </View>

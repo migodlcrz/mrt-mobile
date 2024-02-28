@@ -71,7 +71,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   };
 
   useEffect(() => {
-    storage.set('pin', '');
+    // storage.set('pin', '');
     if (storage.getString('pin') === '') {
       setPinMessage('Register your pin.');
     }
