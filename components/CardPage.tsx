@@ -73,6 +73,25 @@ const CardPage = () => {
 
   const handleAddCard = async () => {
     try {
+      if (fetchedCard) {
+        const response = await fetch(
+          // `https://mrt-server-shg0.onrender.com/api/cards/${fetchedCard?._id}`,
+          `http://localhost:4000/api/cards/${fetchedCard?._id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({mounted: true}),
+          },
+        );
+        if (response.ok) {
+          console.log('GOOD ANG FETCH');
+        } else {
+          console.log('FAILED ANG FETCH');
+        }
+      }
+
       let existingCards = storage.getString('cardlist');
       if (!existingCards) {
         existingCards = '[]';
@@ -98,7 +117,17 @@ const CardPage = () => {
     });
   };
 
-  const handleDelete = (card: Card) => {
+  const handleDelete = async (card: Card) => {
+    console.log('ID', card._id);
+    await fetch(
+      `https://mrt-server-shg0.onrender.com/api/cards/${card._id}`,
+      // `http://localhost:4000/api/cards/api/cards/${card._id}`,
+
+      {
+        method: 'PATCH',
+        body: JSON.stringify({mounted: false}),
+      },
+    );
     // Get the stored cards from MMKV
     const storedCardsString = storage.getString('cardlist');
     if (storedCardsString) {
@@ -284,7 +313,24 @@ const CardPage = () => {
                       </View>
                       <TouchableOpacity
                         className="bg-red-800 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
-                        onPress={() => handleDelete(card)}>
+                        // onPress={() => handleDelete(card)}>
+                        onPress={() => {
+                          Alert.alert(
+                            'Confirmation',
+                            'Are you sure you want to remove this card?',
+                            [
+                              {
+                                text: 'Cancel',
+                                style: 'cancel',
+                              },
+                              {
+                                text: 'OK',
+                                onPress: () => handleDelete(card),
+                              },
+                            ],
+                            {cancelable: false},
+                          );
+                        }}>
                         <Icon name="trash" size={20} color="white" />
                       </TouchableOpacity>
                     </View>
