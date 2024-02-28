@@ -7,6 +7,8 @@ export type RootStackParamList = {
   Scan: undefined;
   Transaction: undefined;
   Main: undefined;
+  App: undefined;
+  MainTabs: undefined;
 };
 
 export type LoginProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
@@ -18,3 +20,8 @@ export type TransactionProps = NativeStackScreenProps<
   'Transaction'
 >;
 export type MainProps = NativeStackScreenProps<RootStackParamList, 'Main'>;
+export type AppProps = NativeStackScreenProps<RootStackParamList, 'App'>;
+export type MainTabsProps = NativeStackScreenProps<
+  RootStackParamList,
+  'MainTabs'
+>;

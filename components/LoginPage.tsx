@@ -12,6 +12,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   const [pin, setPin] = useState('');
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [pinMessage, setPinMessage] = useState('Enter your pin');
+  const [loginButton, setLoginButton] = useState('Login');
 
   const checkPin = () => {
     if (pinMessage === 'Register your pin.') {
@@ -31,6 +32,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
         text1Style: {color: 'green', fontSize: 20},
       });
       setPinMessage('Enter your pin');
+      setLoginButton('Login');
       setPin('');
       setShowKeyboard(false);
       return;
@@ -71,9 +73,10 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   };
 
   useEffect(() => {
-    // storage.set('pin', '');
+    storage.set('pin', '');
     if (storage.getString('pin') === '') {
       setPinMessage('Register your pin.');
+      setLoginButton('Register');
     }
   }, []);
 
@@ -214,7 +217,7 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
                 className="bg-[#0d9276] py-3 rounded-lg shadow-lg shadow-black"
                 onPress={checkPin}>
                 <Text className="font-bold text-[#dbe7c9] text-2xl text-center">
-                  Login
+                  {loginButton}
                 </Text>
               </TouchableOpacity>
             </View>
