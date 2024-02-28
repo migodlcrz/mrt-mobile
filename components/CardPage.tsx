@@ -30,7 +30,20 @@ const CardPage = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchMatchingCards = async () => {
+    // Check if cardSearch exists in lCards
     const uid = Number(cardSearch);
+    const cardInLCards = lCards.find(card => card.uid === uid);
+
+    if (cardInLCards) {
+      Toast.show({
+        type: 'error',
+        text1: 'Card is already in list!',
+        text1Style: {color: 'red', fontSize: 20},
+      });
+      setCardSearch('');
+      return;
+    }
+
     var found = false;
     try {
       const response = await fetch(
@@ -71,27 +84,37 @@ const CardPage = () => {
     }
   };
 
-  const handleAddCard = async () => {
-    try {
-      if (fetchedCard) {
-        const response = await fetch(
-          // `https://mrt-server-shg0.onrender.com/api/cards/${fetchedCard?._id}`,
-          `http://localhost:4000/api/cards/${fetchedCard?._id}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({mounted: true}),
-          },
-        );
-        if (response.ok) {
-          console.log('GOOD ANG FETCH');
-        } else {
-          console.log('FAILED ANG FETCH');
-        }
-      }
+  const linkToPhone = async () => {
+    if (fetchedCard) {
+      const response = await fetch(
+        `https://mrt-server-shg0.onrender.com/api/cards/${fetchedCard._id}`,
+        {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({mounted: true}),
+        },
+      );
+    }
+    return;
+  };
 
+  const unlinkToPhone = async () => {
+    if (fetchedCard) {
+      const response = await fetch(
+        `https://mrt-server-shg0.onrender.com/api/cards/${fetchedCard._id}`,
+        {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({mounted: false}),
+        },
+      );
+    }
+    return;
+  };
+
+  const handleAddCard = () => {
+    try {
+      linkToPhone();
       let existingCards = storage.getString('cardlist');
       if (!existingCards) {
         existingCards = '[]';
@@ -118,7 +141,7 @@ const CardPage = () => {
   };
 
   const handleDelete = async (card: Card) => {
-    console.log('ID', card._id);
+    unlinkToPhone();
     await fetch(
       `https://mrt-server-shg0.onrender.com/api/cards/${card._id}`,
       // `http://localhost:4000/api/cards/api/cards/${card._id}`,
