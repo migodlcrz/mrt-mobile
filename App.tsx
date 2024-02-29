@@ -14,9 +14,10 @@ import {MMKV} from 'react-native-mmkv';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import UserInactivity from 'react-native-user-detector-active-inactive';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {AppProps, MainTabsProps} from './types/types';
 import useKeyboardHook from 'react-native-user-detector-active-inactive';
+import {DeviceEventEmitter} from 'react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -52,89 +53,59 @@ const MainTabs: React.FC<MainProps> = ({navigation}) => {
   const onStateChange = (state: any) => {
     setCurrentRoute(state?.routes[state.index]?.name);
   };
+
+  // useEffect(() => {
+  //   const tabPressListener = DeviceEventEmitter.addListener('tabPress', () => {
+  //     // console.log('PRESSED');
+  //   });
+
+  //   DeviceEventEmitter.addListener('card', () => {
+  //     setTimeout(() => {
+  //       // Note: this is not doing anything meaningful. You might want to navigate or perform some action here.
+  //     }, 1000);
+  //   });
+
+  //   return () => {
+  //     tabPressListener.remove();
+  //     DeviceEventEmitter.removeAllListeners('card');
+  //   };
+  // }, []);
+
+  const pressHome = () => {
+    DeviceEventEmitter.emit('home');
+  };
+
+  const pressCard = () => {
+    DeviceEventEmitter.emit('card');
+  };
+
+  const pressScan = () => {
+    DeviceEventEmitter.emit('scan');
+  };
+
   return (
-    <UserInactivity
-      currentScreen={currentRoute} // get screen name, if used than timer will to to be reset when navigating screen otherwise not to reset
-      timeForInactivity={60} // means 10 second
-      onHandleActiveInactive={handleActiveInactive} // customization setting for navigating screen routing when app-surface is active or in-active beahviour
-      consoleTimer={true} // To check the timer in console
-      // style={{flex:1}}   // customize style
-    >
-      <Tab.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          tabBarStyle: {backgroundColor: '#0d9276', height: 50, padding: 4},
-          tabBarActiveTintColor: '#424242',
-          tabBarInactiveTintColor: '#dbe7c9',
-          tabBarActiveBackgroundColor: 'green',
-        }}>
-        <Tab.Screen
-          name="Home"
-          component={HomePage}
-          options={{
-            tabBarIcon: ({focused, color, size}) => (
-              <Icon
-                name={focused ? 'home' : 'home'}
-                size={size}
-                color={color}
-              />
-            ),
-            headerShown: true,
-            headerStyle: {
-              backgroundColor: '#0d9276',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        />
-        <Tab.Screen
-          name="Card"
-          component={CardPage}
-          options={{
-            tabBarIcon: ({focused, color, size}) => (
-              <Icon
-                name={focused ? 'credit-card' : 'credit-card'}
-                size={size}
-                color={color}
-              />
-            ),
-            headerShown: true,
-            headerStyle: {
-              backgroundColor: '#0d9276',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        />
-        <Tab.Screen
-          name="Scan"
-          component={ScanPage}
-          options={{
-            tabBarIcon: ({focused, color, size}) => (
-              <Icon
-                name={focused ? 'qrcode' : 'qrcode'}
-                size={size}
-                color={color}
-              />
-            ),
-            headerShown: true,
-            headerStyle: {
-              backgroundColor: '#0d9276',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        />
-        {/* <Tab.Screen
-        name="Transaction"
-        component={TransactionPage}
+    // <UserInactivity
+    //   currentScreen={currentRoute} // get screen name, if used than timer will to to be reset when navigating screen otherwise not to reset
+    //   timeForInactivity={60}
+    //   onHandleActiveInactive={handleActiveInactive} // customization setting for navigating screen routing when app-surface is active or in-active beahviour
+    //   consoleTimer={true} // To check the timer in console
+    //   // style={{flex:1}}   // customize style
+    // >
+    <Tab.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        tabBarStyle: {backgroundColor: '#0d9276', height: 50, padding: 4},
+        tabBarActiveTintColor: '#424242',
+        tabBarInactiveTintColor: '#dbe7c9',
+        tabBarActiveBackgroundColor: 'green',
+      }}>
+      <Tab.Screen
+        name="Home"
+        component={HomePage}
         options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon name={focused ? 'home' : 'home'} size={size} color={color} />
+          ),
           headerShown: true,
           headerStyle: {
             backgroundColor: '#0d9276',
@@ -144,9 +115,60 @@ const MainTabs: React.FC<MainProps> = ({navigation}) => {
             fontWeight: 'bold',
           },
         }}
-      /> */}
-      </Tab.Navigator>
-    </UserInactivity>
+        listeners={{
+          tabPress: pressHome,
+        }}
+      />
+      <Tab.Screen
+        name="Card"
+        component={CardPage}
+        options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon
+              name={focused ? 'credit-card' : 'credit-card'}
+              size={size}
+              color={color}
+            />
+          ),
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#0d9276',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        listeners={{
+          tabPress: pressCard,
+        }}
+      />
+      <Tab.Screen
+        name="Scan"
+        component={ScanPage}
+        options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon
+              name={focused ? 'qrcode' : 'qrcode'}
+              size={size}
+              color={color}
+            />
+          ),
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#0d9276',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        listeners={{
+          tabPress: pressScan,
+        }}
+      />
+    </Tab.Navigator>
+    // </UserInactivity>
   );
 };
 

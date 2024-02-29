@@ -22,7 +22,8 @@
     "react-native-toast-message": "^2.2.0",
     "react-native-user-detector-active-inactive": "^0.0.8",
     "react-native-vector-icons": "^10.0.3",
-    "react-native-vision-camera": "^3.9.0"
+    "react-native-vision-camera": "^3.9.0",
+    "react-qr-code": "^2.0.12"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

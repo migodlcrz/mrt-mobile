@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {storage} from '../App';
-import {Alert} from 'react-native';
+import {Alert, DeviceEventEmitter} from 'react-native';
 
 import {
   RefreshControl,
@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {CardProps} from '../types/types';
 
 interface Card {
   _id: string;
@@ -22,12 +23,16 @@ interface Card {
   history: [{in: string; out: string; date: Date}];
 }
 
-const CardPage = () => {
+const CardPage: React.FC<CardProps> = ({navigation}) => {
   const [cardSearch, setCardSearch] = useState<string>('');
   const [fetchedCard, setFetchedCard] = useState<Card | null>(null);
   const [hasSearchTerm, setHasSearchTerm] = useState(false);
   const [lCards, setLCards] = useState<Card[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const pressScan = () => {
+    DeviceEventEmitter.emit('scan');
+  };
 
   const fetchMatchingCards = async () => {
     // Check if cardSearch exists in lCards
@@ -79,6 +84,66 @@ const CardPage = () => {
         text1: `${cardSearch} found!`,
         text1Style: {color: 'green', fontSize: 20},
       });
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+    }
+  };
+
+  const fetchMatchingCardsQR = async () => {
+    console.log('Pumasok sa fetch QR:', storage.getString('qr-scanned'));
+    // Check if cardSearch exists in lCards
+    const uid = Number(storage.getString('qr-scanned'));
+    const cardInLCards = lCards.find(card => card.uid === uid);
+
+    console.log('NASA LIST?', cardInLCards);
+    if (cardInLCards) {
+      console.log('PUMASOK SA MERON NA KAPAREHA');
+      Toast.show({
+        type: 'error',
+        text1: 'Card is already in list!',
+        text1Style: {color: 'red', fontSize: 20},
+      });
+      setCardSearch('');
+      return;
+    }
+
+    var found = false;
+    try {
+      const response = await fetch(
+        `https://mrt-server-shg0.onrender.com/api/cards`,
+        {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'},
+        },
+      );
+
+      const cards: Card[] = await response.json();
+
+      cards.forEach(card => {
+        if (card.uid === uid) {
+          found = true;
+          setFetchedCard(card);
+          setHasSearchTerm(true);
+        }
+      });
+
+      if (!found) {
+        Toast.show({
+          type: 'error',
+          text1: 'No matching card',
+          text1Style: {color: 'red', fontSize: 20},
+        });
+        setCardSearch('');
+        return;
+      }
+
+      Toast.show({
+        type: 'success',
+        text1: `${cardSearch} found!`,
+        text1Style: {color: 'green', fontSize: 20},
+      });
+
+      storage.set('qr-scanned', '');
     } catch (error) {
       console.error('Error fetching cards:', error);
     }
@@ -238,6 +303,16 @@ const CardPage = () => {
   };
 
   useEffect(() => {
+    const tabPressListener = DeviceEventEmitter.addListener('card', () => {
+      // console.log('PRESSED CARD');
+      // console.log('QR SCANNED: ', storage.getString('qr-scanned'));
+      fetchMatchingCardsQR();
+      // storage.delete('cardlist');
+      // storage.delete('cards');
+      return () => {
+        tabPressListener.remove();
+      };
+    });
     // storage.delete('cardlist');
     // storage.delete('cards');
     fetchLocalCards();
@@ -284,6 +359,7 @@ const CardPage = () => {
                   onPress={() => {
                     setHasSearchTerm(false);
                     setCardSearch('');
+                    storage.set('qr-scanned', '');
                   }}>
                   <Text className=" text-xl text-black">
                     {/* <Icon name="minus" size={30} color="#0d9276" /> */}
@@ -299,14 +375,20 @@ const CardPage = () => {
           </View>
         )}
         <View className="flex flex-row justify-between items-center border-b-2 pb-2">
-          <Text className="font-bold text-[#0d9276] text-center text-2xl">
-            Cards
-          </Text>
+          <TouchableOpacity
+            className="flex flex-row space-x-2"
+            onPress={() => {
+              navigation.navigate('Scan');
+              pressScan();
+            }}>
+            <Icon name="qrcode" size={30} color="#0d9276" />
+          </TouchableOpacity>
           <TouchableOpacity onPress={fetchRefreshCards}>
             <Icon name="refresh" size={30} color="#0d9276" />
           </TouchableOpacity>
         </View>
         <ScrollView
+          style={{flex: 1}}
           className="mb-4"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {DeviceEventEmitter, StyleSheet, Text, View} from 'react-native';
 import {
   Camera,
   useCameraDevice,
@@ -9,6 +9,7 @@ import {
 import {useIsFocused} from '@react-navigation/native';
 import {useAppState} from '@react-native-community/hooks';
 import {ScanProps} from '../types/types';
+import {storage} from '../App';
 
 const ScanPage: React.FC<ScanProps> = ({navigation}) => {
   const [cameraPermission, setCameraPermission] = useState(false);
@@ -19,6 +20,22 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
   const appState = useAppState();
 
   useEffect(() => {
+    const tabPressListener = DeviceEventEmitter.addListener('scan', () => {
+      console.log('PRESSED SCAN');
+      const checkCameraPermission = async () => {
+        const status = await requestPermission();
+        setCameraPermission(status === true);
+      };
+
+      if (!hasPermission) {
+        checkCameraPermission();
+      } else {
+        setActive(isFocused && appState === 'active');
+      }
+      return () => {
+        tabPressListener.remove();
+      };
+    });
     const checkCameraPermission = async () => {
       const status = await requestPermission();
       setCameraPermission(status === true);
@@ -45,8 +62,11 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
   const codeScanner = useCodeScanner({
     codeTypes: ['qr', 'ean-13'],
     onCodeScanned: codes => {
-      console.log(`Scanned codes!`, codes);
+      console.log(`Scanned: `, codes[0].value);
+      storage.set('qr-scanned', String(codes[0].value));
       setActive(false);
+
+      DeviceEventEmitter.emit('card');
       return navigation.navigate('Card');
     },
   });
