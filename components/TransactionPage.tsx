@@ -1,7 +1,20 @@
-import React from 'react';
-import {Text, View} from 'react-native';
+import React, {useEffect} from 'react';
+import {DeviceEventEmitter, Text, View} from 'react-native';
+import {storage} from '../App';
 
 const TransactionPage = () => {
+  useEffect(() => {
+    const tabPressListener = DeviceEventEmitter.addListener(
+      'transaction',
+      () => {
+        console.log('PRESSED TRANSACTION');
+        console.log(storage.getString('transactionID'));
+        return () => {
+          tabPressListener.remove();
+        };
+      },
+    );
+  }, []);
   return (
     <View
       style={{

@@ -1,5 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import {DeviceEventEmitter, StyleSheet, Text, View} from 'react-native';
+import {
+  DeviceEventEmitter,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  Touchable,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   Camera,
   useCameraDevice,
@@ -10,18 +20,295 @@ import {useIsFocused} from '@react-navigation/native';
 import {useAppState} from '@react-native-community/hooks';
 import {ScanProps} from '../types/types';
 import {storage} from '../App';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Toast from 'react-native-toast-message';
+
+interface Card {
+  _id: string;
+  uid: number;
+  balance: number;
+  isTap: boolean;
+  in: string;
+  history: [{in: string; out: string; date: Date}];
+}
+
+interface Station {
+  _id: string;
+  name: string;
+  lat: number;
+  long: number;
+  connection: string[];
+}
+
+interface Path {
+  path: string[];
+  distance: number;
+}
+
+interface QR {
+  name: string;
+  method: string;
+}
 
 const ScanPage: React.FC<ScanProps> = ({navigation}) => {
+  const [inModal, setInModal] = useState(false);
+  const [outModal, setOutModal] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(false);
   const [active, setActive] = useState(false);
   const {hasPermission, requestPermission} = useCameraPermission();
+  const [cardList, setCardList] = useState<Card[] | null>(null);
+
+  const [station, setStation] = useState<Station[] | null>(null);
+
+  const [cardIn, setCardIn] = useState<Card | null>(null);
+  const [cardOut, setCardOut] = useState<Card | null>(null);
+
+  const [cardBalance, setCardBalance] = useState<Number | null>(null);
+
+  const [stationIn, setStationIn] = useState<string | null>(null);
+  const [stationOut, setStationOut] = useState<string | null>(null);
+
+  const [stationStart, setStationStart] = useState<Station | null>(null);
+  const [stationEnd, setStationEnd] = useState<Station | null>(null);
+
+  const [path, setPath] = useState<string[]>([]);
+  const [distance, setDistance] = useState<number | null>(null);
 
   const isFocused = useIsFocused();
   const appState = useAppState();
 
+  const fetchStation = async () => {
+    const response = await fetch(
+      `https://mrt-server-shg0.onrender.com/api/stations`,
+      {
+        headers: {'Content-Type': 'application/json'},
+      },
+    );
+
+    const data = await response.json();
+    if (response.ok) {
+      setStation(data);
+    } else {
+      throw new Error('Failed to fetch data');
+    }
+  };
+
+  const setTapInfo = async () => {
+    console.log('PUMASOK SA TAP INFO');
+    console.log('STATION NAME: ', stationIn);
+    const localCards: Card[] = JSON.parse(storage.getString('cardlist') || '');
+    const card: string[] = [];
+
+    for (let i = 0; i < localCards.length; i++) {
+      const uid = localCards[i].uid;
+      card.push(String(uid));
+    }
+    const response = await fetch(
+      'https://mrt-server-shg0.onrender.com/api/cards/mobile/get',
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({uid: card}),
+      },
+    );
+
+    if (response.ok) {
+      setCardList(localCards);
+      console.log('RESPONSE OK');
+    }
+
+    if (!response.ok) {
+      console.log('RESPONSE NOT OK');
+    }
+  };
+
+  const checkConnectionIn = () => {
+    console.log('nagcheck ng connection');
+    if (station) {
+      if (station.length > 0) {
+        const matchedStation = station.find(
+          station => station.name === stationIn,
+        );
+
+        console.log('MATCHED STATION: ', matchedStation?.name);
+        if (matchedStation) {
+          setStationStart(matchedStation);
+        }
+      }
+    }
+  };
+
+  const checkConnectionOut = () => {
+    if (station) {
+      if (station.length > 0) {
+        const matchedStation = station.find(
+          station => station.name === stationOut,
+        );
+
+        console.log('MATCHED STATION: ', matchedStation?.name);
+        if (matchedStation) {
+          setStationEnd(matchedStation);
+        }
+      }
+    }
+  };
+
+  const getStationEnd = () => {
+    console.log('get station end');
+    if (station) {
+      if (station.length > 0) {
+        const matchedStation = station.find(
+          station => station.name === stationIn,
+        );
+
+        if (matchedStation) {
+          setStationEnd(matchedStation);
+        }
+      }
+    }
+  };
+
+  const handleTapIn = async () => {
+    console.log('STATION NAME', stationIn);
+    console.log('CARD IN', cardIn?.uid);
+
+    try {
+      const response = await fetch(
+        `https://mrt-server-shg0.onrender.com/api/cards/in`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            enteredUID: cardIn?.uid,
+            stationStart: stationIn,
+          }),
+        },
+      );
+      const message = await response.json();
+      if (response.ok) {
+        console.log('Tapped in');
+        Toast.show({
+          type: 'success',
+          text1: `${cardIn?.uid} tapped in!`,
+          text1Style: {color: 'green', fontSize: 18},
+        });
+
+        setCardIn(null);
+      }
+
+      if (!response.ok) {
+        console.log(message.error);
+        Toast.show({
+          type: 'error',
+          text1: `${message.error}`,
+          text1Style: {color: 'red', fontSize: 18},
+        });
+      }
+    } catch (error) {
+      console.log('ERROR: ', error);
+      Toast.show({
+        type: 'error',
+        text1: `ERROR: ${error}`,
+        text1Style: {color: 'red', fontSize: 18},
+      });
+    }
+  };
+
+  const handleTapOut = async () => {
+    console.log('STATION END', stationEnd?.name);
+    console.log('CARD OUT: ', cardOut?.uid);
+
+    try {
+      const response = await fetch(
+        `https://mrt-server-shg0.onrender.com/api/cards/out`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            enteredUID: cardOut?.uid,
+            stationEnd: stationEnd?.name,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setDistance(data.distance);
+        setCardOut(null);
+        console.log('Tapped out');
+        Toast.show({
+          type: 'success',
+          text1: `${cardOut?.uid} tapped out!`,
+          text1Style: {color: 'green', fontSize: 18},
+        });
+
+        setCardOut(null);
+      }
+
+      if (!response.ok) {
+        console.log(data.error);
+        Toast.show({
+          type: 'error',
+          text1: `${data.error}`,
+          text1Style: {color: 'red', fontSize: 18},
+        });
+      }
+    } catch (error) {
+      console.log('Internal error');
+      Toast.show({
+        type: 'error',
+        text1: `ERROR: ${error}`,
+        text1Style: {color: 'red', fontSize: 18},
+      });
+    }
+  };
+
+  const getPath = async () => {
+    // console.log('STATION START:', stationStart);
+    // console.log('STATION END: ', stationEnd);
+    if (stationStart && stationEnd) {
+      try {
+        const response = await fetch(
+          `https://mrt-server-shg0.onrender.com/api/path`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              startStation: stationStart,
+              endStation: stationEnd,
+            }),
+          },
+        );
+
+        if (response.ok) {
+          const path: Path = await response.json();
+          console.log('DISTANCE', path.distance);
+          console.log('PATH', path.path);
+          setPath(path.path);
+          setDistance(path.distance);
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    console.log('PRESSED SCAN');
+    fetchStation();
+  }, []);
+
   useEffect(() => {
     const tabPressListener = DeviceEventEmitter.addListener('scan', () => {
       console.log('PRESSED SCAN');
+
       const checkCameraPermission = async () => {
         const status = await requestPermission();
         setCameraPermission(status === true);
@@ -62,18 +349,94 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
   const codeScanner = useCodeScanner({
     codeTypes: ['qr', 'ean-13'],
     onCodeScanned: codes => {
-      console.log(`Scanned: `, codes[0].value);
-      storage.set('qr-scanned', String(codes[0].value));
-      setActive(false);
+      let corners = codes[0].corners;
+      let readFlag = false;
 
-      DeviceEventEmitter.emit('card');
-      return navigation.navigate('Card');
+      if (
+        corners![0].x >= 504 &&
+        corners![0].y >= 224 &&
+        corners![1].x <= 770 &&
+        corners![1].y >= 228 &&
+        corners![2].x <= 775 &&
+        corners![2].y <= 493 &&
+        corners![3].x >= 506 &&
+        corners![3].y <= 502
+      ) {
+        const qr: QR = JSON.parse(codes[0].value || '{}');
+        console.log('QR NAME', qr.name);
+        console.log('QR METHOD', qr.method);
+
+        try {
+          if (qr.method === 'add') {
+            storage.set('qr-scanned', String(qr.name));
+          }
+
+          if (qr.method === 'in') {
+            console.log('IN FUNCTION');
+            setStationIn(qr.name);
+            // checkConnectionIn();
+            setTapInfo();
+            setInModal(true);
+            return;
+          }
+
+          if (qr.method === 'out') {
+            console.log('OUT FUNCTION');
+            setStationOut(qr.name);
+            checkConnectionOut();
+            // getStationEnd();
+            setTapInfo();
+            setOutModal(true);
+            return;
+          }
+        } catch (error) {
+          console.log('ERROR ', error);
+        }
+        DeviceEventEmitter.emit('qr-card');
+        return navigation.navigate('Card');
+        // setActive(false);
+      }
     },
+    // onCodeScanned: codes => {
+    //   const qr: QR = JSON.parse(codes[0].value || '{}');
+    //   console.log('QR NAME', qr.name);
+    //   console.log('QR METHOD', qr.method);
+
+    //   try {
+    //     if (qr.method === 'add') {
+    //       storage.set('qr-scanned', String(qr.name));
+    //     }
+
+    //     if (qr.method === 'in') {
+    //       console.log('IN FUNCTION');
+    //       setStationIn(qr.name);
+    //       // checkConnectionIn();
+    //       setTapInfo();
+    //       setInModal(true);
+    //       return;
+    //     }
+
+    //     if (qr.method === 'out') {
+    //       console.log('OUT FUNCTION');
+    //       setStationOut(qr.name);
+    //       checkConnectionOut();
+    //       // getStationEnd();
+    //       setTapInfo();
+    //       setOutModal(true);
+    //       return;
+    //     }
+    //   } catch (error) {
+    //     console.log('ERROR ', error);
+    //   }
+    //   DeviceEventEmitter.emit('qr-card');
+    //   return navigation.navigate('Card');
+    //   // setActive(false);
+    // },
   });
 
   const BoxOverlay = () => (
     <View className="flex w-full h-full items-center justify-center">
-      <View className="border-4 border-[#0d9276] w-48 h-48 rounded-md" />
+      <View className="border-8 border-dashed rounded-3xl border-[#0d9276] w-48 h-48" />
     </View>
   );
 
@@ -95,6 +458,123 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
                 codeScanner={codeScanner}
                 className="w-full h-full z-0"
               />
+              <View>
+                {/* modal for in */}
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={inModal}>
+                  <View className="h-full w-full flex justify-center items-center px-8 py-20">
+                    <View className="flex flex-col w-full h-full rounded-xl p-5 items-center bg-[#dbe7c9] space-y-4">
+                      <View className="flex flex-row w-full justify-between">
+                        <Text className="text-[#0d9276] font-bold text-3xl">
+                          {stationIn && stationIn} - In
+                        </Text>
+                        <Icon
+                          name="close"
+                          size={30}
+                          color="#0d9276"
+                          onPress={() => setInModal(false)}
+                        />
+                      </View>
+                      <ScrollView className="overflow-y-auto">
+                        {cardList &&
+                          cardList.map((card: Card, index: number) => {
+                            // console.log(cardList);
+                            return (
+                              <View key={index} className="w-full">
+                                <TouchableOpacity
+                                  className="flex flex-col space-y-2 bg-[#0d9276] rounded-2xl p-4 justify-center shadow-lg shadow-black my-2 w-full"
+                                  onPress={() => setCardIn(card)}>
+                                  <Text className="text-white font-bold text-4xl">
+                                    {card.uid}
+                                  </Text>
+                                  <Text className="text-white text-2xl">
+                                    Balance: ₱{card.balance}
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            );
+                          })}
+                      </ScrollView>
+                      <TextInput
+                        className="bg-white rounded-xl w-full text-black text-xl text-center font-bold"
+                        value={cardIn ? String(cardIn?.uid) : ''}
+                        readOnly
+                      />
+                      <TouchableOpacity
+                        className="flex w-full items-center"
+                        onPress={() => {
+                          setInModal(false);
+                          handleTapIn();
+                        }}>
+                        <Text className="text-[#dbe7c9] bg-[#0d9276] rounded-2xl py-2 px-4 text-2xl font-bold shadow-lg shadow-black">
+                          Tap In
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </Modal>
+
+                {/* modal for out */}
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={outModal}>
+                  <View className="h-full w-full flex justify-center items-center px-8 py-20">
+                    <View className="flex flex-col w-full h-full rounded-xl p-5 items-center bg-[#dbe7c9] space-y-4">
+                      <View className="flex flex-row w-full justify-between">
+                        <Text className="text-[#0d9276] font-bold text-3xl">
+                          {stationOut && stationOut} - Out
+                        </Text>
+                        <Icon
+                          name="close"
+                          size={30}
+                          color="#0d9276"
+                          onPress={() => setOutModal(false)}
+                        />
+                      </View>
+                      <ScrollView className="overflow-y-auto">
+                        {cardList &&
+                          cardList.map((card: Card, index: number) => {
+                            // console.log(cardList);
+                            return (
+                              <View key={index} className="w-full">
+                                <TouchableOpacity
+                                  className="flex flex-col space-y-2 bg-[#0d9276] rounded-2xl p-4 justify-center shadow-lg shadow-black my-2 w-full"
+                                  onPress={() => setCardOut(card)}>
+                                  <Text className="text-white font-bold text-4xl">
+                                    {card.uid}
+                                  </Text>
+                                  <Text className="text-white text-2xl">
+                                    Balance: ₱{card.balance}
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            );
+                          })}
+                      </ScrollView>
+                      <TextInput
+                        className="bg-white rounded-xl w-full text-black text-xl text-center font-bold"
+                        value={cardOut ? String(cardOut?.uid) : ''}
+                        readOnly
+                      />
+                      <TouchableOpacity
+                        className="flex w-full items-center"
+                        onPress={() => {
+                          getStationEnd();
+                          setOutModal(false);
+                          handleTapOut();
+                          setCardIn(null);
+                        }}>
+                        <Text className="text-[#dbe7c9] bg-[#0d9276] rounded-2xl py-2 px-4 text-2xl font-bold shadow-lg shadow-black">
+                          Tap Out
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </Modal>
+              </View>
             </>
           ) : (
             <View className="flex items-center justify-center">

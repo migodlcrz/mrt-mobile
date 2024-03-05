@@ -54,22 +54,9 @@ const MainTabs: React.FC<MainProps> = ({navigation}) => {
     setCurrentRoute(state?.routes[state.index]?.name);
   };
 
-  // useEffect(() => {
-  //   const tabPressListener = DeviceEventEmitter.addListener('tabPress', () => {
-  //     // console.log('PRESSED');
-  //   });
-
-  //   DeviceEventEmitter.addListener('card', () => {
-  //     setTimeout(() => {
-  //       // Note: this is not doing anything meaningful. You might want to navigate or perform some action here.
-  //     }, 1000);
-  //   });
-
-  //   return () => {
-  //     tabPressListener.remove();
-  //     DeviceEventEmitter.removeAllListeners('card');
-  //   };
-  // }, []);
+  const pressTransaction = () => {
+    DeviceEventEmitter.emit('transaction');
+  };
 
   const pressHome = () => {
     DeviceEventEmitter.emit('home');
@@ -99,26 +86,6 @@ const MainTabs: React.FC<MainProps> = ({navigation}) => {
         tabBarInactiveTintColor: '#dbe7c9',
         tabBarActiveBackgroundColor: 'green',
       }}>
-      <Tab.Screen
-        name="Home"
-        component={HomePage}
-        options={{
-          tabBarIcon: ({focused, color, size}) => (
-            <Icon name={focused ? 'home' : 'home'} size={size} color={color} />
-          ),
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: '#0d9276',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-        listeners={{
-          tabPress: pressHome,
-        }}
-      />
       <Tab.Screen
         name="Card"
         component={CardPage}
@@ -165,6 +132,50 @@ const MainTabs: React.FC<MainProps> = ({navigation}) => {
         }}
         listeners={{
           tabPress: pressScan,
+        }}
+      />
+      <Tab.Screen
+        name="Transaction"
+        component={TransactionPage}
+        options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon
+              name={focused ? 'history' : 'history'}
+              size={size}
+              color={color}
+            />
+          ),
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#0d9276',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        listeners={{
+          tabPress: pressTransaction,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={HomePage}
+        options={{
+          tabBarIcon: ({focused, color, size}) => (
+            <Icon name={focused ? 'gear' : 'gear'} size={size} color={color} />
+          ),
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#0d9276',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        listeners={{
+          tabPress: pressHome,
         }}
       />
     </Tab.Navigator>

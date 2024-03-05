@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {storage} from '../App';
-import {Alert, DeviceEventEmitter} from 'react-native';
+import {Alert, DeviceEventEmitter, Modal} from 'react-native';
 
 import {
   RefreshControl,
@@ -29,13 +29,19 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   const [hasSearchTerm, setHasSearchTerm] = useState(false);
   const [lCards, setLCards] = useState<Card[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [transactionIndex, setTransactionIndex] = useState<number | null>(null);
+
+  const pressTransaction = (index: number) => {
+    storage.set('transactionID', String(index));
+    DeviceEventEmitter.emit('transaction');
+    navigation.navigate('Transaction');
+  };
 
   const pressScan = () => {
     DeviceEventEmitter.emit('scan');
   };
 
   const fetchMatchingCards = async () => {
-    // Check if cardSearch exists in lCards
     const uid = Number(cardSearch);
     const cardInLCards = lCards.find(card => card.uid === uid);
 
@@ -90,14 +96,11 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const fetchMatchingCardsQR = async () => {
-    console.log('Pumasok sa fetch QR:', storage.getString('qr-scanned'));
     // Check if cardSearch exists in lCards
     const uid = Number(storage.getString('qr-scanned'));
     const cardInLCards = lCards.find(card => card.uid === uid);
 
-    console.log('NASA LIST?', cardInLCards);
     if (cardInLCards) {
-      console.log('PUMASOK SA MERON NA KAPAREHA');
       Toast.show({
         type: 'error',
         text1: 'Card is already in list!',
@@ -304,11 +307,19 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
 
   useEffect(() => {
     const tabPressListener = DeviceEventEmitter.addListener('card', () => {
-      // console.log('PRESSED CARD');
-      // console.log('QR SCANNED: ', storage.getString('qr-scanned'));
+      console.log('PRESSED CARD');
+      return () => {
+        tabPressListener.remove();
+      };
+    });
+    // storage.delete('cardlist');
+    // storage.delete('cards');
+    fetchLocalCards();
+  }, []);
+
+  useEffect(() => {
+    const tabPressListener = DeviceEventEmitter.addListener('qr-card', () => {
       fetchMatchingCardsQR();
-      // storage.delete('cardlist');
-      // storage.delete('cards');
       return () => {
         tabPressListener.remove();
       };
@@ -381,6 +392,14 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
               navigation.navigate('Scan');
               pressScan();
             }}>
+            <Icon name="plus" size={30} color="#0d9276" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="flex flex-row space-x-2"
+            onPress={() => {
+              navigation.navigate('Scan');
+              pressScan();
+            }}>
             <Icon name="qrcode" size={30} color="#0d9276" />
           </TouchableOpacity>
           <TouchableOpacity onPress={fetchRefreshCards}>
@@ -416,28 +435,45 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
                         <Icon name="circle" size={10} color={signalColor} />
                         <Text className="text-2xl text-slate-50">{status}</Text>
                       </View>
-                      <TouchableOpacity
-                        className="bg-red-800 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
-                        // onPress={() => handleDelete(card)}>
-                        onPress={() => {
-                          Alert.alert(
-                            'Confirmation',
-                            'Are you sure you want to remove this card?',
-                            [
-                              {
-                                text: 'Cancel',
-                                style: 'cancel',
-                              },
-                              {
-                                text: 'OK',
-                                onPress: () => handleDelete(card),
-                              },
-                            ],
-                            {cancelable: false},
-                          );
-                        }}>
-                        <Icon name="trash" size={20} color="white" />
-                      </TouchableOpacity>
+                      <View className="flex flex-row space-x-2">
+                        <TouchableOpacity
+                          className="bg-yellow-600 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
+                          onPress={() => {
+                            pressTransaction(index);
+                          }}>
+                          <Icon name="qrcode" size={20} color="white" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          className="bg-green-600 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
+                          onPress={() => {
+                            pressTransaction(index);
+                            console.log('index: ', index);
+                          }}>
+                          <Icon name="history" size={20} color="white" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          className="bg-red-800 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
+                          // onPress={() => handleDelete(card)}>
+                          onPress={() => {
+                            Alert.alert(
+                              'Confirmation',
+                              'Are you sure you want to remove this card?',
+                              [
+                                {
+                                  text: 'Cancel',
+                                  style: 'cancel',
+                                },
+                                {
+                                  text: 'OK',
+                                  onPress: () => handleDelete(card),
+                                },
+                              ],
+                              {cancelable: false},
+                            );
+                          }}>
+                          <Icon name="trash" size={20} color="white" />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </View>
