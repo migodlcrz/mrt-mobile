@@ -76,6 +76,7 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
   const [startStation, setStartStation] = useState<string | null>(null);
 
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [showError, setShowError] = useState<boolean>(false);
 
   const isFocused = useIsFocused();
   const appState = useAppState();
@@ -335,82 +336,66 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
         corners![3].x >= 506 &&
         corners![3].y <= 502
       ) {
-        const qr: QR = JSON.parse(codes[0].value || '{}');
-        console.log('QR NAME', qr.name);
-        console.log('QR METHOD', qr.method);
-
         try {
-          if (qr.method === 'add') {
-            storage.set('qr-scanned', String(qr.name));
-          }
+          const qr = JSON.parse(codes[0].value || '{}');
+          console.log('QR NAME', qr.name);
+          console.log('QR METHOD', qr.method);
 
-          if (qr.method === 'in') {
-            console.log('IN FUNCTION');
-            setStationIn(qr.name);
-            // checkConnectionIn();
-            setTapInfo();
-            setInModal(true);
-            return;
-          }
+          try {
+            if (qr.method === 'add') {
+              storage.set('qr-scanned', String(qr.name));
+            }
 
-          if (qr.method === 'out') {
-            console.log('OUT FUNCTION');
-            setStationOut(qr.name);
-            checkConnectionOut();
-            // getStationEnd();
-            setTapInfo();
-            setOutModal(true);
-            return;
+            if (qr.method === 'in') {
+              setStationIn(qr.name);
+              // checkConnectionIn();
+              setTapInfo();
+              setInModal(true);
+              return;
+            }
+
+            if (qr.method === 'out') {
+              setStationOut(qr.name);
+              checkConnectionOut();
+              // getStationEnd();
+              setTapInfo();
+              setOutModal(true);
+              return;
+            }
+          } catch (error) {
+            console.log('ERROR ', error);
           }
+          DeviceEventEmitter.emit('qr-card');
+          return navigation.navigate('Card');
+          // setActive(false);
         } catch (error) {
-          console.log('ERROR ', error);
+          console.log('ERROR: ', error);
+          setShowError(true);
+          setTimeout(() => {
+            setShowError(false);
+          }, 2000);
         }
-        DeviceEventEmitter.emit('qr-card');
-        return navigation.navigate('Card');
-        // setActive(false);
       }
     },
-    // onCodeScanned: codes => {
-    //   const qr: QR = JSON.parse(codes[0].value || '{}');
-    //   console.log('QR NAME', qr.name);
-    //   console.log('QR METHOD', qr.method);
-
-    //   try {
-    //     if (qr.method === 'add') {
-    //       storage.set('qr-scanned', String(qr.name));
-    //     }
-
-    //     if (qr.method === 'in') {
-    //       console.log('IN FUNCTION');
-    //       setStationIn(qr.name);
-    //       // checkConnectionIn();
-    //       setTapInfo();
-    //       setInModal(true);
-    //       return;
-    //     }
-
-    //     if (qr.method === 'out') {
-    //       console.log('OUT FUNCTION');
-    //       setStationOut(qr.name);
-    //       checkConnectionOut();
-    //       // getStationEnd();
-    //       setTapInfo();
-    //       setOutModal(true);
-    //       return;
-    //     }
-    //   } catch (error) {
-    //     console.log('ERROR ', error);
-    //   }
-    //   DeviceEventEmitter.emit('qr-card');
-    //   return navigation.navigate('Card');
-    //   // setActive(false);
-    // },
   });
 
   const BoxOverlay = () => (
-    <View className="flex w-full h-full items-center justify-center">
-      <View className="border-8 border-dashed rounded-3xl border-[#0d9276] w-48 h-48" />
-    </View>
+    <>
+      <View className="flex w-full h-full items-center justify-center">
+        <View
+          className={`border-8 border-dashed rounded-3xl ${
+            showError ? 'border-[#ff0000]' : 'border-[#0d9276]'
+          } w-48 h-48`}
+        />
+        <View className="flex w-full h-full items-center justify-center absolute">
+          {showError && (
+            <Text className="text-xl text-red-600 font-bold">
+              INVALID QR CODE
+            </Text>
+          )}
+        </View>
+      </View>
+    </>
   );
 
   return (
@@ -519,6 +504,22 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
                           </Text>
                           <Text className="text-black font-bold text-2xl">
                             - ₱{totalFare}
+                          </Text>
+                        </View>
+                        <View className="flex flex-row justify-between items-center w-full">
+                          <Text className="text-[#0d9276] font-bold text-2xl">
+                            Beginning Balance:
+                          </Text>
+                          <Text className="text-black font-bold text-2xl">
+                            ₱{totalFare}
+                          </Text>
+                        </View>
+                        <View className="flex flex-row justify-between items-center w-full">
+                          <Text className="text-[#0d9276] font-bold text-2xl">
+                            Final Balance:
+                          </Text>
+                          <Text className="text-black font-bold text-2xl">
+                            ₱{totalFare}
                           </Text>
                         </View>
                         <View className="flex flex-row justify-between items-center w-full">
