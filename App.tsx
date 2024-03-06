@@ -24,6 +24,8 @@ const Tab = createBottomTabNavigator();
 export const storage = new MMKV();
 
 const App: React.FC<AppProps> = ({navigation}) => {
+  const [isLogin, setIsLogin] = useState(storage.getBoolean('access'));
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
@@ -37,6 +39,7 @@ const App: React.FC<AppProps> = ({navigation}) => {
           component={MainTabs}
           options={{headerShown: false}}
         />
+        <Stack.Screen name="Transaction" component={TransactionPage} />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>
@@ -84,7 +87,7 @@ const MainTabs: React.FC<MainProps> = ({navigation}) => {
         tabBarStyle: {backgroundColor: '#0d9276', height: 50, padding: 4},
         tabBarActiveTintColor: '#424242',
         tabBarInactiveTintColor: '#dbe7c9',
-        tabBarActiveBackgroundColor: 'green',
+        tabBarActiveBackgroundColor: '#21bf7d',
       }}>
       <Tab.Screen
         name="Card"
@@ -132,30 +135,6 @@ const MainTabs: React.FC<MainProps> = ({navigation}) => {
         }}
         listeners={{
           tabPress: pressScan,
-        }}
-      />
-      <Tab.Screen
-        name="Transaction"
-        component={TransactionPage}
-        options={{
-          tabBarIcon: ({focused, color, size}) => (
-            <Icon
-              name={focused ? 'history' : 'history'}
-              size={size}
-              color={color}
-            />
-          ),
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: '#0d9276',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-        listeners={{
-          tabPress: pressTransaction,
         }}
       />
       <Tab.Screen

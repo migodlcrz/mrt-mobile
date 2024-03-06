@@ -480,7 +480,6 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
                       <ScrollView className="overflow-y-auto">
                         {cardList &&
                           cardList.map((card: Card, index: number) => {
-                            // console.log(cardList);
                             return (
                               <View key={index} className="w-full">
                                 <TouchableOpacity
@@ -492,6 +491,17 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
                                   <Text className="text-white text-2xl">
                                     Balance: ₱{card.balance}
                                   </Text>
+                                  <View className="flex flex-row items-center space-x-2">
+                                    <Icon
+                                      name="circle"
+                                      size={10}
+                                      color={card.isTap ? 'green' : 'red'}
+                                    />
+
+                                    <Text className="text-white text-xl">
+                                      {card.isTap ? 'Onboard' : 'Offboard'}
+                                    </Text>
+                                  </View>
                                 </TouchableOpacity>
                               </View>
                             );

@@ -10,6 +10,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
   View,
 } from 'react-native';
 import {CardProps} from '../types/types';
@@ -29,10 +30,10 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   const [hasSearchTerm, setHasSearchTerm] = useState(false);
   const [lCards, setLCards] = useState<Card[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [transactionIndex, setTransactionIndex] = useState<number | null>(null);
+  const [date, setDate] = useState();
 
-  const pressTransaction = (index: number) => {
-    storage.set('transactionID', String(index));
+  const pressTransaction = (uid: number) => {
+    storage.set('transactionID', String(uid));
     DeviceEventEmitter.emit('transaction');
     navigation.navigate('Transaction');
   };
@@ -42,6 +43,8 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const fetchMatchingCards = async () => {
+    console.log('FETCH ONLY');
+
     const uid = Number(cardSearch);
     const cardInLCards = lCards.find(card => card.uid === uid);
 
@@ -96,17 +99,18 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const fetchMatchingCardsQR = async () => {
-    // Check if cardSearch exists in lCards
+    console.log('FETCH QR');
     const uid = Number(storage.getString('qr-scanned'));
     const cardInLCards = lCards.find(card => card.uid === uid);
 
     if (cardInLCards) {
+      setCardSearch('');
       Toast.show({
         type: 'error',
         text1: 'Card is already in list!',
         text1Style: {color: 'red', fontSize: 20},
       });
-      setCardSearch('');
+
       return;
     }
 
@@ -153,6 +157,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const linkToPhone = async () => {
+    console.log('NAGLINK SA PHONE ANG CARD');
     if (fetchedCard) {
       const response = await fetch(
         `https://mrt-server-shg0.onrender.com/api/cards/${fetchedCard._id}`,
@@ -167,6 +172,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const unlinkToPhone = async () => {
+    console.log('NAGUNLINK SA PHONE ANG CARD');
     if (fetchedCard) {
       const response = await fetch(
         `https://mrt-server-shg0.onrender.com/api/cards/${fetchedCard._id}`,
@@ -181,6 +187,23 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const handleAddCard = () => {
+    const uid = Number(storage.getString('qr-scanned'));
+    console.log('UID: ', uid);
+
+    const cardInLCards = lCards.find(card => card.uid === uid);
+
+    if (cardInLCards) {
+      console.log('pumasok sa may cards na');
+      setCardSearch('');
+      Toast.show({
+        type: 'error',
+        text1: 'Card is already in list!',
+        text1Style: {color: 'red', fontSize: 20},
+      });
+
+      return;
+    }
+
     try {
       linkToPhone();
       let existingCards = storage.getString('cardlist');
@@ -209,6 +232,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const handleDelete = async (card: Card) => {
+    console.log('DELETE FETCHED CARD', fetchedCard?._id);
     unlinkToPhone();
     await fetch(
       `https://mrt-server-shg0.onrender.com/api/cards/${card._id}`,
@@ -308,6 +332,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   useEffect(() => {
     const tabPressListener = DeviceEventEmitter.addListener('card', () => {
       console.log('PRESSED CARD');
+
       return () => {
         tabPressListener.remove();
       };
@@ -394,16 +419,13 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
             }}>
             <Icon name="plus" size={30} color="#0d9276" />
           </TouchableOpacity>
-          <TouchableOpacity
-            className="flex flex-row space-x-2"
-            onPress={() => {
-              navigation.navigate('Scan');
-              pressScan();
-            }}>
-            <Icon name="qrcode" size={30} color="#0d9276" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={fetchRefreshCards}>
-            <Icon name="refresh" size={30} color="#0d9276" />
+          <Text className="text-[#0d9276]">Last refresh: {date}</Text>
+          <TouchableOpacity onPress={onRefresh}>
+            {!refreshing ? (
+              <Icon name="refresh" size={30} color="#0d9276" />
+            ) : (
+              <ActivityIndicator size={30} color="#0d9276" />
+            )}
           </TouchableOpacity>
         </View>
         <ScrollView
@@ -439,15 +461,15 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
                         <TouchableOpacity
                           className="bg-yellow-600 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
                           onPress={() => {
-                            pressTransaction(index);
+                            navigation.navigate('Scan');
+                            pressScan();
                           }}>
                           <Icon name="qrcode" size={20} color="white" />
                         </TouchableOpacity>
                         <TouchableOpacity
                           className="bg-green-600 py-2 px-3 rounded-xl w-auto text-center shadow-lg shadow-black"
                           onPress={() => {
-                            pressTransaction(index);
-                            console.log('index: ', index);
+                            pressTransaction(card.uid);
                           }}>
                           <Icon name="history" size={20} color="white" />
                         </TouchableOpacity>

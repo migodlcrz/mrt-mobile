@@ -3,11 +3,11 @@ import {View, Text, DeviceEventEmitter} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 function HomePage() {
-  console.log('NATRIGGER YUNG HOME PAGE');
+  console.log('NATRIGGER YUNG SETTING');
 
   useEffect(() => {
     const tabPressListener = DeviceEventEmitter.addListener('home', () => {
-      console.log('PRESSED HOME');
+      console.log('PRESSED SETTING');
 
       return () => {
         tabPressListener.remove();

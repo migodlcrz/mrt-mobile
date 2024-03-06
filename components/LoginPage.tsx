@@ -58,6 +58,11 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
       console.log('Pin Incorrect');
       return;
     }
+
+    //pag equal yung naka store sa local dun sa inenter ng user
+    if (localPin === pin) {
+      storage.set('access', true);
+    }
     setPin('');
     navigation.navigate('Main');
   };
@@ -73,10 +78,11 @@ const LoginPage: React.FC<LoginProps> = ({navigation}) => {
   };
 
   useEffect(() => {
-    storage.set('pin', '0813');
+    // storage.set('pin', '0813');
     console.log('PIN: ', storage.getString('pin'));
 
-    if (storage.getString('pin') === null) {
+    const pin = storage.getString('pin');
+    if (!pin) {
       setPinMessage('Register your pin.');
       setLoginButton('Register');
     }
