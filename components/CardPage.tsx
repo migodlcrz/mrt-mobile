@@ -187,8 +187,8 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
   };
 
   const handleAddCard = () => {
-    const uid = Number(storage.getString('qr-scanned'));
-    console.log('UID: ', uid);
+    const uid = Number(fetchedCard?.uid);
+    console.log('UID: ', fetchedCard?.uid);
 
     const cardInLCards = lCards.find(card => card.uid === uid);
 
@@ -200,7 +200,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
         text1: 'Card is already in list!',
         text1Style: {color: 'red', fontSize: 20},
       });
-
+      setHasSearchTerm(false);
       return;
     }
 
@@ -356,10 +356,10 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
 
   return (
     <View className="bg-[#dbe7c9] h-full justify-start items-center p-4">
-      <Text className="text-[#0d9276] font-bold text-4xl">GlobalTek Cards</Text>
+      {/* <Text className="text-[#0d9276] font-bold text-4xl">GlobalTek Cards</Text> */}
 
       {/* search card */}
-      <View className="flex space-y-4 w-full h-full max-h-full pt-4">
+      <View className="flex space-y-4 w-full h-full max-h-full ">
         <View className="flex flex-row bg-[#0d9276] rounded-3xl p-2 justify-center items-center shadow-lg shadow-black">
           <TextInput
             value={cardSearch}
@@ -397,17 +397,16 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
                     setCardSearch('');
                     storage.set('qr-scanned', '');
                   }}>
-                  <Text className=" text-xl text-black">
-                    {/* <Icon name="minus" size={30} color="#0d9276" /> */}
-                    Cancel
-                  </Text>
+                  <Text className=" text-xl text-black">Cancel</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
         ) : (
           <View className="flex flex-col h-[166px] bg-gray-200 rounded-3xl p-4 justify-center items-center shadow-lg shadow-black">
-            <Text className="text-gray-500 ">Search to see details</Text>
+            <Text className="text-gray-500 ">
+              Search or scan to see details
+            </Text>
           </View>
         )}
         <View className="flex flex-row justify-between items-center border-b-2 pb-2">
@@ -429,8 +428,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <ScrollView
-          style={{flex: 1}}
-          className="mb-4"
+          className="flex-1"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
@@ -444,7 +442,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
               }
 
               return (
-                <View key={index}>
+                <TouchableOpacity key={index}>
                   <View className="flex flex-col space-y-2 bg-[#0d9276] rounded-2xl p-4 justify-center shadow-lg shadow-black my-2">
                     <Text className="text-white font-bold text-4xl">
                       {card.uid}
@@ -498,7 +496,7 @@ const CardPage: React.FC<CardProps> = ({navigation}) => {
                       </View>
                     </View>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
         </ScrollView>

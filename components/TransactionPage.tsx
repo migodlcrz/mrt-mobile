@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  BackHandler,
   DeviceEventEmitter,
   ScrollView,
   Text,
@@ -7,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import {storage} from '../App';
+import {TransactionProps} from '../types/types';
 
 interface Card {
   _id: string;
@@ -17,9 +19,24 @@ interface Card {
   history: [{in: string; out: string; fare: number; date: Date}];
 }
 
-const TransactionPage = () => {
+const TransactionPage: React.FC<TransactionProps> = ({navigation}) => {
   const [uid, setUID] = useState<Number | null>(null);
   const [card, setCard] = useState<Card | null>(null);
+
+  const backAction = () => {
+    navigation.navigate('Main');
+    // BackHandler.exitApp();
+    return true;
+  };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   const fetchCard = async () => {
     console.log('FETCH CARD: ', uid);
@@ -67,10 +84,10 @@ const TransactionPage = () => {
   return (
     <View className="h-full justify-start items-center">
       <View className="flex flex-col bg-[#dbe7c9] h-full w-full p-5 pb-8 justify-center items-center shadow-lg shadow-black">
-        <Text className="text-[#0d9276] font-bold text-2xl">
+        <Text className="flex bg-[#dbe7c9] shadow-xl shadow-black w-full text-[#0d9276] font-bold text-3xl  rounded-t-3xl text-center py-2">
           UID: {card?.uid}
         </Text>
-        <View className="flex flex-row bg-[#0d9276] w-full rounded-t-3xl">
+        <View className="flex flex-row bg-[#0d9276] w-full">
           <Text className="flex-1 text-[#dbe7c9] text-center text-xl py-2 font-bold">
             In
           </Text>

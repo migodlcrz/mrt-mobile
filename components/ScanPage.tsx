@@ -71,8 +71,11 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
   const [stationStart, setStationStart] = useState<Station | null>(null);
   const [stationEnd, setStationEnd] = useState<Station | null>(null);
 
-  const [path, setPath] = useState<string[]>([]);
   const [distance, setDistance] = useState<number | null>(null);
+  const [totalFare, setTotalFare] = useState<number | null>(null);
+  const [startStation, setStartStation] = useState<string | null>(null);
+
+  const [showDetails, setShowDetails] = useState<boolean>(false);
 
   const isFocused = useIsFocused();
   const appState = useAppState();
@@ -239,6 +242,8 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
 
       if (response.ok) {
         setDistance(data.distance);
+        setTotalFare(data.totalFare);
+        setStartStation(data.start);
         setCardOut(null);
         console.log('Tapped out');
         Toast.show({
@@ -246,7 +251,7 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
           text1: `${cardOut?.uid} tapped out!`,
           text1Style: {color: 'green', fontSize: 18},
         });
-
+        setShowDetails(true);
         setCardOut(null);
       }
 
@@ -265,38 +270,6 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
         text1: `ERROR: ${error}`,
         text1Style: {color: 'red', fontSize: 18},
       });
-    }
-  };
-
-  const getPath = async () => {
-    // console.log('STATION START:', stationStart);
-    // console.log('STATION END: ', stationEnd);
-    if (stationStart && stationEnd) {
-      try {
-        const response = await fetch(
-          `https://mrt-server-shg0.onrender.com/api/path`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              startStation: stationStart,
-              endStation: stationEnd,
-            }),
-          },
-        );
-
-        if (response.ok) {
-          const path: Path = await response.json();
-          console.log('DISTANCE', path.distance);
-          console.log('PATH', path.path);
-          setPath(path.path);
-          setDistance(path.distance);
-        }
-      } catch (error) {
-        console.error('Fetch error:', error);
-      }
     }
   };
 
@@ -474,7 +447,10 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
                           name="close"
                           size={30}
                           color="#0d9276"
-                          onPress={() => setInModal(false)}
+                          onPress={() => {
+                            setInModal(false);
+                            setCardIn(null);
+                          }}
                         />
                       </View>
                       <ScrollView className="overflow-y-auto">
@@ -532,56 +508,110 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
                   transparent={true}
                   visible={outModal}>
                   <View className="h-full w-full flex justify-center items-center px-8 py-20">
-                    <View className="flex flex-col w-full h-full rounded-xl p-5 items-center bg-[#dbe7c9] space-y-4">
-                      <View className="flex flex-row w-full justify-between">
+                    {showDetails ? (
+                      <View className="flex flex-col w-full h-auto rounded-xl p-5 items-center bg-[#dbe7c9] space-y-4">
                         <Text className="text-[#0d9276] font-bold text-3xl">
-                          {stationOut && stationOut} - Out
+                          Travel Details:
                         </Text>
-                        <Icon
-                          name="close"
-                          size={30}
-                          color="#0d9276"
-                          onPress={() => setOutModal(false)}
-                        />
+                        <View className="flex flex-row justify-between items-center w-full">
+                          <Text className="text-[#0d9276] font-bold text-2xl">
+                            Total Fare:
+                          </Text>
+                          <Text className="text-black font-bold text-2xl">
+                            - ₱{totalFare}
+                          </Text>
+                        </View>
+                        <View className="flex flex-row justify-between items-center w-full">
+                          <Text className="text-[#0d9276] font-bold text-2xl">
+                            Distance:
+                          </Text>
+                          <Text className="text-black font-bold text-2xl">
+                            {distance} KM
+                          </Text>
+                        </View>
+                        <View className="flex flex-row justify-between items-center w-full">
+                          <Text className="text-[#0d9276] font-bold text-2xl">
+                            From:
+                          </Text>
+                          <Text className="text-black font-bold text-2xl">
+                            {startStation}
+                          </Text>
+                        </View>
+                        <View className="flex flex-row justify-between items-center w-full">
+                          <Text className="text-[#0d9276] font-bold text-2xl">
+                            To:
+                          </Text>
+                          <Text className="text-black font-bold text-2xl">
+                            {stationOut}
+                          </Text>
+                        </View>
+
+                        <TouchableOpacity
+                          className="bg-[#0d9276] px-3 py-2 rounded-2xl"
+                          onPress={() => {
+                            setOutModal(false);
+                            setShowDetails(false);
+                          }}>
+                          <Text className="text-3xl font-bold text-[#dbe7c9]">
+                            Close
+                          </Text>
+                        </TouchableOpacity>
                       </View>
-                      <ScrollView className="overflow-y-auto">
-                        {cardList &&
-                          cardList.map((card: Card, index: number) => {
-                            // console.log(cardList);
-                            return (
-                              <View key={index} className="w-full">
-                                <TouchableOpacity
-                                  className="flex flex-col space-y-2 bg-[#0d9276] rounded-2xl p-4 justify-center shadow-lg shadow-black my-2 w-full"
-                                  onPress={() => setCardOut(card)}>
-                                  <Text className="text-white font-bold text-4xl">
-                                    {card.uid}
-                                  </Text>
-                                  <Text className="text-white text-2xl">
-                                    Balance: ₱{card.balance}
-                                  </Text>
-                                </TouchableOpacity>
-                              </View>
-                            );
-                          })}
-                      </ScrollView>
-                      <TextInput
-                        className="bg-white rounded-xl w-full text-black text-xl text-center font-bold"
-                        value={cardOut ? String(cardOut?.uid) : ''}
-                        readOnly
-                      />
-                      <TouchableOpacity
-                        className="flex w-full items-center"
-                        onPress={() => {
-                          getStationEnd();
-                          setOutModal(false);
-                          handleTapOut();
-                          setCardIn(null);
-                        }}>
-                        <Text className="text-[#dbe7c9] bg-[#0d9276] rounded-2xl py-2 px-4 text-2xl font-bold shadow-lg shadow-black">
-                          Tap Out
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                    ) : (
+                      <View className="flex flex-col w-full h-full rounded-xl p-5 items-center bg-[#dbe7c9] space-y-4">
+                        <View className="flex flex-row w-full justify-between">
+                          <Text className="text-[#0d9276] font-bold text-3xl">
+                            {stationOut && stationOut} - Out
+                          </Text>
+                          <Icon
+                            name="close"
+                            size={30}
+                            color="#0d9276"
+                            onPress={() => {
+                              setOutModal(false);
+                              setCardOut(null);
+                            }}
+                          />
+                        </View>
+                        <ScrollView className="overflow-y-auto">
+                          {cardList &&
+                            cardList.map((card: Card, index: number) => {
+                              // console.log(cardList);
+                              return (
+                                <View key={index} className="w-full">
+                                  <TouchableOpacity
+                                    className="flex flex-col space-y-2 bg-[#0d9276] rounded-2xl p-4 justify-center shadow-lg shadow-black my-2 w-full"
+                                    onPress={() => setCardOut(card)}>
+                                    <Text className="text-white font-bold text-4xl">
+                                      {card.uid}
+                                    </Text>
+                                    <Text className="text-white text-2xl">
+                                      Balance: ₱{card.balance}
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                              );
+                            })}
+                        </ScrollView>
+                        <TextInput
+                          className="bg-white rounded-xl w-full text-black text2xl text-center font-bold "
+                          value={cardOut ? String(cardOut?.uid) : ''}
+                          readOnly
+                        />
+                        <TouchableOpacity
+                          className="flex w-full items-center"
+                          onPress={() => {
+                            getStationEnd();
+                            // setOutModal(false);
+                            handleTapOut();
+                            setCardIn(null);
+                          }}>
+                          <Text className="text-[#dbe7c9] bg-[#0d9276] rounded-2xl py-2 px-4 text-2xl font-bold shadow-lg shadow-black">
+                            Tap Out
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 </Modal>
               </View>

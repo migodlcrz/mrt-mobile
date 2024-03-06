@@ -2,7 +2,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 export type RootStackParamList = {
   Login: undefined;
-  Home: undefined;
+  Settings: undefined;
   Card: undefined;
   Scan: undefined;
   Transaction: undefined;
@@ -12,7 +12,10 @@ export type RootStackParamList = {
 };
 
 export type LoginProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
-export type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
+export type SettingsProps = NativeStackScreenProps<
+  RootStackParamList,
+  'Settings'
+>;
 export type CardProps = NativeStackScreenProps<RootStackParamList, 'Card'>;
 export type ScanProps = NativeStackScreenProps<RootStackParamList, 'Scan'>;
 export type TransactionProps = NativeStackScreenProps<
