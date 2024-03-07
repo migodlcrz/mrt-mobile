@@ -363,8 +363,15 @@ const ScanPage: React.FC<ScanProps> = ({navigation}) => {
               return;
             }
           } catch (error) {
-            console.log('ERROR ', error);
+            setShowError(true);
+            setTimeout(() => {
+              setShowError(false);
+            }, 2000);
           }
+          setShowError(true);
+          setTimeout(() => {
+            setShowError(false);
+          }, 2000);
           DeviceEventEmitter.emit('qr-card');
           return navigation.navigate('Card');
           // setActive(false);
